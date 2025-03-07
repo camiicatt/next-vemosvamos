@@ -81,9 +81,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
               <nav className="space-y-6">
                 {[
                   { href: "/", label: "HOME", isActive: true },
-                  { href: "/work", label: "THE WORK" },
-                  { href: "/about", label: "ABOUT US" },
-                  { href: "/news", label: "NEWS" },
+                  { href: "#work", label: "THE WORK" },
+                  { href: "#about", label: "ABOUT US" },
+                  { href: "#news", label: "NEWS" },
                   { label: "CONTACT US", onClick: () => setShowNewsletter(true) },
                 ].map((item) => (
                   <motion.div
