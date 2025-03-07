@@ -73,116 +73,118 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </motion.button>
         </div>
 
-        {/* Content Container */}
-        <div className="flex-grow flex flex-col md:flex-row">
-          {/* Left Section - Navigation */}
-          <div className="flex-1 p-8 md:p-16 flex flex-col justify-end">
-            <nav className="space-y-6">
-              {[
-                { href: "/", label: "HOME", isActive: true },
-                { href: "/work", label: "THE WORK" },
-                { href: "/about", label: "ABOUT US" },
-                { href: "/news", label: "NEWS" },
-                { label: "CONTACT US", onClick: () => setShowNewsletter(true) },
-              ].map((item) => (
+        {/* Scrollable Content Container */}
+        <div className="flex-grow overflow-y-auto">
+          <div className="flex flex-col md:flex-row min-h-[calc(100vh-5rem)]">
+            {/* Left Section - Navigation */}
+            <div className="flex-1 p-8 md:p-16 flex flex-col justify-end">
+              <nav className="space-y-6">
+                {[
+                  { href: "/", label: "HOME", isActive: true },
+                  { href: "/work", label: "THE WORK" },
+                  { href: "/about", label: "ABOUT US" },
+                  { href: "/news", label: "NEWS" },
+                  { label: "CONTACT US", onClick: () => setShowNewsletter(true) },
+                ].map((item) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        className={`block text-4xl md:text-5xl font-bold tracking-tight ${
+                          item.isActive ? "text-[#8b0000]" : "text-white hover:text-white/80"
+                        } transition-colors`}
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={item.onClick}
+                        className="block text-4xl md:text-5xl font-bold tracking-tight text-white hover:text-white/80 transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    )}
+                  </motion.div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Right Section - Contact & Social */}
+            <div className="flex-none w-full md:w-[400px] p-8 md:p-16 flex flex-col justify-end">
+              <div className="space-y-12">
                 <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-4"
                 >
-                  {item.href ? (
-                    <Link
-                      href={item.href}
-                      className={`block text-4xl md:text-5xl font-bold tracking-tight ${
-                        item.isActive ? "text-[#8b0000]" : "text-white hover:text-white/80"
-                      } transition-colors`}
-                    >
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={item.onClick}
-                      className="block text-4xl md:text-5xl font-bold tracking-tight text-white hover:text-white/80 transition-colors"
-                    >
-                      {item.label}
-                    </button>
-                  )}
+                  <h2 className="text-2xl font-bold text-white">ADDRESS</h2>
+                  <address className="not-italic text-white/80 text-lg leading-relaxed">
+                    711 Navarro Street
+                    <br />
+                    San Antonio, TX 78205
+                    <br />
+                    USA
+                  </address>
                 </motion.div>
-              ))}
-            </nav>
-          </div>
 
-          {/* Right Section - Contact & Social */}
-          <div className="flex-none w-full md:w-[400px] p-8 md:p-16 flex flex-col justify-end">
-            <div className="space-y-12">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-4"
-              >
-                <h2 className="text-2xl font-bold text-white">ADDRESS</h2>
-                <address className="not-italic text-white/80 text-lg leading-relaxed">
-                  711 Navarro Street
-                  <br />
-                  San Antonio, TX 78205
-                  <br />
-                  USA
-                </address>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="space-y-4"
+                >
+                  <p className="text-white/80 text-lg">
+                    Tel:{" "}
+                    <a href="tel:+12108314439" className="hover:text-white transition-colors">
+                      +1 (210) 831-4439
+                    </a>
+                  </p>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-4"
-              >
-                <p className="text-white/80 text-lg">
-                  Tel:{" "}
-                  <a href="tel:+12108314439" className="hover:text-white transition-colors">
-                    +1 (210) 831-4439
-                  </a>
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-4"
-              >
-                <h2 className="text-2xl font-bold text-white">SOCIAL</h2>
-                <div className="flex space-x-6">
-                  <a
-                    href="https://www.instagram.com/vemos.vamos/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-colors"
-                  >
-                    <span className="sr-only">Instagram</span>
-                    <i className="ri-instagram-line text-3xl"></i>
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/company/vemosvamos/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-colors"
-                  >
-                    <span className="sr-only">LinkedIn</span>
-                    <i className="ri-linkedin-fill text-3xl"></i>
-                  </a>
-                  <a
-                    href="https://www.facebook.com/vemosvamos"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 hover:text-white transition-colors"
-                  >
-                    <span className="sr-only">Facebook</span>
-                    <i className="ri-facebook-fill text-3xl"></i>
-                  </a>
-                </div>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-4"
+                >
+                  <h2 className="text-2xl font-bold text-white">SOCIAL</h2>
+                  <div className="flex space-x-6">
+                    <a
+                      href="https://www.instagram.com/vemos.vamos/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/80 hover:text-white transition-colors"
+                    >
+                      <span className="sr-only">Instagram</span>
+                      <i className="ri-instagram-line text-3xl"></i>
+                    </a>
+                    <a
+                      href="https://www.linkedin.com/company/vemosvamos/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/80 hover:text-white transition-colors"
+                    >
+                      <span className="sr-only">LinkedIn</span>
+                      <i className="ri-linkedin-fill text-3xl"></i>
+                    </a>
+                    <a
+                      href="https://www.facebook.com/vemosvamos"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/80 hover:text-white transition-colors"
+                    >
+                      <span className="sr-only">Facebook</span>
+                      <i className="ri-facebook-fill text-3xl"></i>
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
             </div>
           </div>
         </div>
@@ -215,7 +217,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 <i className="ri-close-line text-3xl" />
               </motion.button>
             </div>
-            <div className="flex-grow flex items-center justify-center p-8">
+            <div className="flex-grow overflow-y-auto flex items-center justify-center p-8">
               <div className="w-full max-w-md">
                 <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">CONTACT US</h2>
                 <Newsletter />

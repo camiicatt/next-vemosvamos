@@ -129,7 +129,7 @@ export function Newsletter() {
                 className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 text-white placeholder-white/50 text-lg"
               />
             </div>
-            {!isDevelopment && <div ref={turnstileRef} data-size="normal" className="w-full" />}
+            {!isDevelopment && <div ref={turnstileRef} data-size="flexible" className="w-full" />}
             <button
               type="submit"
               disabled={isSubmitting}
