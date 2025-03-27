@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Azeret_Mono as Geist_Mono } from "next/font/google"
 import { GoogleTagManager } from '@next/third-parties/google'
+import { Analytics } from '@vercel/analytics/next';
 import "./globals.css"
 
 const geistSans = Geist({
@@ -64,7 +65,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <GoogleTagManager gtmId="G-END50N2KZ9" />
-      <body className="font-sans bg-vvBackground text-vvText antialiased">{children}</body>
+      <body className="font-sans bg-vvBackground text-vvText antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
