@@ -21,7 +21,7 @@ export default function Home() {
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subheadlineRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLButtonElement>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [, setIsLoaded] = useState(false)
 
   // Set up GSAP animations
   useEffect(() => {
@@ -200,7 +200,7 @@ export default function Home() {
                   ref={subheadlineRef}
                   className="text-xl md:text-2xl lg:text-3xl text-[#264653] mb-12 max-w-3xl mx-auto leading-relaxed"
                 >
-                  A bilingual space for those who aren't afraid to question, create, and grow.
+                  A bilingual space for those who aren&apos;t afraid to question, create, and grow.
                 </p>
               </div>
 

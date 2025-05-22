@@ -14,7 +14,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   const [showNewsletter, setShowNewsletter] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [, setIsPlaying] = useState(false)
   const [isVideoError, setIsVideoError] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -67,7 +67,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           .catch((error) => {
             console.error("Auto-play was prevented:", error)
             setIsPlaying(false)
-            // We'll show a play button that the user can click
           })
       }
     }
@@ -89,22 +88,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       video.removeEventListener("error", handleError)
     }
   }, [])
-
-  // Manual play function for user interaction
-  const togglePlayPause = () => {
-    const video = videoRef.current
-    if (!video) return
-
-    if (video.paused) {
-      video
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((err) => console.error("Play failed:", err))
-    } else {
-      video.pause()
-      setIsPlaying(false)
-    }
-  }
 
   const socialLinks = [
     {
@@ -300,7 +283,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
-                  Let's Connect
+                  Let&apos;s Connect
                 </motion.h2>
 
                 <motion.button
@@ -432,7 +415,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">GET IN TOUCH</h2>
                   <p className="text-white/80 mb-6 text-base md:text-lg">
-                    We'd love to hear from you. Fill out the form below and we'll get back to you soon.
+                    We&apos;d love to hear from you. Fill out the form below and we&apos;ll get back to you soon.
                   </p>
                 </motion.div>
                 <Newsletter />
