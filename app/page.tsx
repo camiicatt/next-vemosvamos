@@ -190,7 +190,7 @@ export default function Home() {
                       />
                     </svg>
                     <h3 className="text-white text-xl font-bold mb-2">Video playback error</h3>
-                    <p className="text-white/70">We're having trouble playing this video. Please try again later.</p>
+                    <p className="text-white/70">We&apos;re having trouble playing this video. Please try again later.</p>
                     <button
                       onClick={() => {
                         setIsVideoError(false)
@@ -268,7 +268,7 @@ export default function Home() {
                   Creatively Raw. Curiosity Driven.
                 </h2>
                 <p className="text-xl text-[#264653] mb-8">
-                  A bilingual space for those who aren't afraid to question, create, and grow.
+                  A bilingual space for those who aren&apos;t afraid to question, create, and grow.
                 </p>
                 <motion.button
                   className="px-8 py-3 bg-[#8b0000] text-white rounded-full font-medium text-lg hover:bg-[#a50000] transition-colors"

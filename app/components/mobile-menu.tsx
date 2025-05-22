@@ -113,7 +113,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  Let's Connect
+                  Let&apos;s Connect
                 </motion.h2>
 
                 <motion.button
@@ -249,7 +249,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">GET IN TOUCH</h2>
                   <p className="text-white/80 mb-8 text-lg">
-                    We'd love to hear from you. Fill out the form below and we'll get back to you soon.
+                    We&apos;d love to hear from you. Fill out the form below and we&apos;ll get back to you soon.
                   </p>
                 </motion.div>
                 <Newsletter />
