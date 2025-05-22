@@ -1,106 +1,140 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { motion, AnimatePresence, useScroll, useTransform } from "motion/react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Navbar } from "./components/navbar"
 import { Footer } from "./components/footer"
 import { MobileMenu } from "./components/mobile-menu"
 import Head from "next/head"
+import gsap from "gsap"
+import { TextPlugin } from "gsap/TextPlugin"
+import { SplitText } from "gsap/SplitText"
+
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(TextPlugin, SplitText)
+}
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isVideoError, setIsVideoError] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const headlineRef = useRef<HTMLHeadingElement>(null)
+  const subheadlineRef = useRef<HTMLParagraphElement>(null)
+  const ctaRef = useRef<HTMLButtonElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  })
-
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1])
-
-  // Handle video loading and playback
+  // Set up GSAP animations
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    // Mark as loaded to prevent animation flashes
+    setIsLoaded(true)
 
-    const handleLoadedData = () => {
-      console.log("Video loaded data")
-      setIsVideoLoaded(true)
-      playVideo()
-    }
+    const headline = headlineRef.current
+    const subheadline = subheadlineRef.current
+    const cta = ctaRef.current
 
-    const handlePlaying = () => {
-      console.log("Video is playing")
-      setIsPlaying(true)
-    }
+    if (!headline || !subheadline || !cta) return
 
-    const handlePause = () => {
-      console.log("Video paused")
-      setIsPlaying(false)
-    }
+    // Clear any existing animations
+    gsap.context(() => {
+      // Create SplitText instances
+      const headlineSplit = new SplitText(headline, { type: "chars,words" })
+      const subheadlineSplit = new SplitText(subheadline, { type: "chars,words" })
 
-    const handleError = (e: Event) => {
-      console.error("Video error:", e)
-      setIsVideoError(true)
-      setIsVideoLoaded(false)
-    }
+      // Set initial states - but don't hide the elements completely
+      gsap.set([headlineSplit.chars, subheadlineSplit.chars, cta], {
+        autoAlpha: 0,
+        y: 50,
+      })
 
-    const playVideo = () => {
-      console.log("Attempting to play video")
-      const playPromise = video.play()
+      // Create the main timeline
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
 
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log("Video playback started successfully")
-            setIsPlaying(true)
+      // Headline animation
+      tl.fromTo(
+        headlineSplit.chars,
+        {
+          y: 50,
+          rotation: 15,
+          autoAlpha: 0,
+        },
+        {
+          duration: 1.2,
+          y: 0,
+          rotation: 0,
+          autoAlpha: 1,
+          stagger: 0.03,
+          ease: "back.out(1.7)",
+        },
+      )
+
+      // Subheadline animation
+      tl.fromTo(
+        subheadlineSplit.chars,
+        {
+          y: 30,
+          autoAlpha: 0,
+        },
+        {
+          duration: 0.8,
+          y: 0,
+          autoAlpha: 1,
+          stagger: 0.01,
+          ease: "power2.out",
+        },
+        "-=0.8",
+      )
+
+      // CTA button animation
+      tl.fromTo(
+        cta,
+        {
+          y: 30,
+          autoAlpha: 0,
+          scale: 0.9,
+        },
+        {
+          duration: 0.8,
+          y: 0,
+          autoAlpha: 1,
+          scale: 1,
+          ease: "elastic.out(1, 0.5)",
+        },
+        "-=0.4",
+      )
+
+      // Add hover effects for each character in the headline
+      headlineSplit.chars.forEach((char) => {
+        gsap.set(char, { transformOrigin: "center bottom" })
+
+        char.addEventListener("mouseenter", () => {
+          gsap.to(char, {
+            y: -15,
+            color: "#a50000",
+            scale: 1.2,
+            rotation: gsap.utils.random(-10, 10),
+            duration: 0.3,
+            ease: "back.out(2)",
           })
-          .catch((error) => {
-            console.error("Auto-play was prevented:", error)
-            setIsPlaying(false)
-            // We'll show a play button that the user can click
+        })
+
+        char.addEventListener("mouseleave", () => {
+          gsap.to(char, {
+            y: 0,
+            color: "#8b0000",
+            scale: 1,
+            rotation: 0,
+            duration: 0.3,
+            ease: "power2.out",
           })
-      }
-    }
+        })
+      })
+    })
 
-    // Add event listeners
-    video.addEventListener("loadeddata", handleLoadedData)
-    video.addEventListener("playing", handlePlaying)
-    video.addEventListener("pause", handlePause)
-    video.addEventListener("error", handleError)
-
-    // Force reload the video to ensure it loads properly
-    video.load()
-
+    // Cleanup function
     return () => {
-      // Clean up event listeners
-      video.removeEventListener("loadeddata", handleLoadedData)
-      video.removeEventListener("playing", handlePlaying)
-      video.removeEventListener("pause", handlePause)
-      video.removeEventListener("error", handleError)
+      gsap.killTweensOf([headline, subheadline, cta])
     }
   }, [])
-
-  // Manual play function for user interaction
-  const togglePlayPause = () => {
-    const video = videoRef.current
-    if (!video) return
-
-    if (video.paused) {
-      video
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((err) => console.error("Play failed:", err))
-    } else {
-      video.pause()
-      setIsPlaying(false)
-    }
-  }
 
   return (
     <>
@@ -148,137 +182,35 @@ export default function Home() {
 
         <Navbar onOpenMenu={() => setIsMenuOpen(true)} />
 
-        <main className="relative z-10 flex-grow flex flex-col justify-center items-center">
-          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center">
-            <motion.div
-              className="w-full max-w-7xl mx-auto px-4 py-20 flex flex-col justify-center items-center"
-              style={{ opacity, scale }}
-            >
-              {/* Video Hero Section */}
-              <div className="relative w-full aspect-video overflow-hidden rounded-2xl shadow-2xl bg-black">
-                {/* Loading state */}
-                {!isVideoLoaded && !isVideoError && (
-                  <motion.div
-                    className="absolute inset-0 bg-[#1A1A1A] flex items-center justify-center z-10"
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: isVideoLoaded ? 0 : 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <motion.div
-                      className="w-16 h-16 border-4 border-t-[#8b0000] border-r-transparent border-b-transparent border-l-transparent rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                    />
-                  </motion.div>
-                )}
-
-                {/* Error state */}
-                {isVideoError && (
-                  <div className="absolute inset-0 bg-[#1A1A1A] flex flex-col items-center justify-center z-10 p-8 text-center">
-                    <svg
-                      className="w-16 h-16 text-[#8b0000] mb-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                    <h3 className="text-white text-xl font-bold mb-2">Video playback error</h3>
-                    <p className="text-white/70">We&apos;re having trouble playing this video. Please try again later.</p>
-                    <button
-                      onClick={() => {
-                        setIsVideoError(false)
-                        if (videoRef.current) {
-                          videoRef.current.load()
-                        }
-                      }}
-                      className="mt-4 px-6 py-2 bg-[#8b0000] text-white rounded-full hover:bg-[#a50000] transition-colors"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                )}
-
-                {/* Video with poster */}
-                <motion.div
-                  className="relative w-full h-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isVideoLoaded ? 1 : 0 }}
-                  transition={{ duration: 0.5 }}
+        <main className="relative z-10 flex-grow flex flex-col justify-center items-center md:mt-16">
+          {/* Hero Section with GSAP Text Animations */}
+          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center px-4">
+            <div className="max-w-5xl mx-auto text-center">
+              <div className="">
+                <h1
+                  ref={headlineRef}
+                  className="text-5xl md:text-7xl lg:text-8xl font-bold text-[#8b0000] mb-8 leading-tight tracking-tight"
                 >
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    poster="https://ampd-asset.s3.us-east-2.amazonaws.com/vv-poster.png"
-                    playsInline
-                    loop
-                    muted
-                    preload="auto"
-                    aria-label="Vemos Vamos promotional video"
-                  >
-                    <source src="https://ampd-asset.s3.us-east-2.amazonaws.com/VV+Web+Banner+2.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-
-                  {/* Overlay gradient for better text visibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-
-                  {/* Play button overlay (shown when video is not playing) */}
-                  {!isPlaying && isVideoLoaded && (
-                    <motion.div
-                      className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                      onClick={togglePlayPause}
-                    >
-                      <motion.div
-                        className="w-20 h-20 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-full"
-                        whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Additional content section that appears as user scrolls */}
-          <div className="w-full bg-[#ECEBE0] py-20">
-            <div className="container mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className="max-w-3xl mx-auto text-center"
-              >
-                <h2 className="text-4xl md:text-5xl font-bold text-[#8b0000] mb-6">
                   Creatively Raw. Curiosity Driven.
-                </h2>
-                <p className="text-xl text-[#264653] mb-8">
-                  A bilingual space for those who aren&apos;t afraid to question, create, and grow.
-                </p>
-                <motion.button
-                  className="px-8 py-3 bg-[#8b0000] text-white rounded-full font-medium text-lg hover:bg-[#a50000] transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsMenuOpen(true)}
+                </h1>
+              </div>
+
+              <div className="overflow-hidden">
+                <p
+                  ref={subheadlineRef}
+                  className="text-xl md:text-2xl lg:text-3xl text-[#264653] mb-12 max-w-3xl mx-auto leading-relaxed"
                 >
-                  Connect With Us
-                </motion.button>
-              </motion.div>
+                  A bilingual space for those who aren't afraid to question, create, and grow.
+                </p>
+              </div>
+
+              <button
+                ref={ctaRef}
+                className="px-8 py-4 bg-[#8b0000] text-white rounded-full font-medium text-lg md:text-xl hover:bg-[#a50000] transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                Connect With Us
+              </button>
             </div>
           </div>
         </main>
