@@ -1,15 +1,24 @@
 "use client"
 
 import { motion } from "motion/react"
-import { useState, useEffect } from "react"
+import Link from "next/link"
+import { useState, useEffect, useRef } from "react"
+import gsap from "gsap"
 
+const MotionLink = motion(Link)
 
 interface NavbarProps {
   onOpenMenu: () => void
+  onLanguageChange?: (language: "en" | "es") => void
 }
 
-export function Navbar({ onOpenMenu }: NavbarProps) {
+export function Navbar({ onOpenMenu, onLanguageChange }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
+  const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en")
+  const toggleRef = useRef<HTMLDivElement>(null)
+  const heartRef = useRef<SVGPathElement>(null)
+  const enTextRef = useRef<HTMLSpanElement>(null)
+  const esTextRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +28,170 @@ export function Navbar({ onOpenMenu }: NavbarProps) {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // GSAP animation for language toggle
+  useEffect(() => {
+    if (!toggleRef.current || !heartRef.current || !enTextRef.current || !esTextRef.current) return
+
+    const heart = heartRef.current
+    const enText = enTextRef.current
+    const esText = esTextRef.current
+
+    gsap.context(() => {
+      if (currentLanguage === "es") {
+        // Animate to Spanish with heart theme
+        gsap.to(heart, {
+          fill: "#8b0000",
+          scale: 1.3, // Reduced from 1.2 to prevent clipping
+          duration: 0.6,
+          ease: "elastic.out(1.2, 0.5)",
+        })
+
+        // Pulse animation
+        gsap.to(heart, {
+          scale: 1.4, // Reduced from 1.3 to prevent clipping
+          duration: 0.3,
+          repeat: 1,
+          yoyo: true,
+          ease: "power2.inOut",
+        })
+
+        gsap.to(enText, {
+          y: -30,
+          opacity: 0,
+          scale: 0.8,
+          duration: 0.4,
+          ease: "power2.out",
+        })
+
+        gsap.to(esText, {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out",
+          delay: 0.1,
+        })
+      } else {
+        // Animate to English with heart theme
+        gsap.to(heart, {
+          fill: "#2a9d8f",
+          scale: 1,
+          duration: 0.6,
+          ease: "elastic.out(1.2, 0.5)",
+        })
+
+        // Pulse animation
+        gsap.to(heart, {
+          scale: 1.1,
+          duration: 0.3,
+          repeat: 1,
+          yoyo: true,
+          ease: "power2.inOut",
+        })
+
+        gsap.to(esText, {
+          y: 30,
+          opacity: 0,
+          scale: 0.8,
+          duration: 0.4,
+          ease: "power2.out",
+        })
+
+        gsap.to(enText, {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out",
+          delay: 0.1,
+        })
+      }
+    })
+  }, [currentLanguage])
+
+  const toggleLanguage = () => {
+    const newLanguage = currentLanguage === "en" ? "es" : "en"
+    setCurrentLanguage(newLanguage)
+
+    // Notify parent component
+    if (onLanguageChange) {
+      onLanguageChange(newLanguage)
+    }
+
+    // Add a fun bounce effect to the entire toggle
+    if (toggleRef.current) {
+      gsap.to(toggleRef.current, {
+        scale: 1.15,
+        duration: 0.15,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.inOut",
+      })
+    }
+
+    // Create heart particles
+    createHeartParticles()
+  }
+
+  const createHeartParticles = () => {
+    if (!toggleRef.current) return
+
+    const container = document.createElement("div")
+    container.style.position = "absolute"
+    container.style.top = "0"
+    container.style.left = "0"
+    container.style.width = "100%"
+    container.style.height = "100%"
+    container.style.pointerEvents = "none"
+    container.style.zIndex = "50"
+    document.body.appendChild(container)
+
+    const colors = ["#8b0000", "#ffc857", "#2a9d8f"]
+
+    for (let i = 0; i < 8; i++) {
+      const heart = document.createElement("div")
+      heart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="${colors[i % colors.length]}">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+      </svg>`
+      heart.style.position = "absolute"
+      heart.style.left = "50%"
+      heart.style.top = "50%"
+      heart.style.transform = "translate(-50%, -50%)"
+      heart.style.opacity = "0"
+      container.appendChild(heart)
+
+      const rect = toggleRef.current.getBoundingClientRect()
+      const startX = rect.left + rect.width / 2
+      const startY = rect.top + rect.height / 2
+
+      gsap.fromTo(
+        heart,
+        {
+          x: 0,
+          y: 0,
+          scale: 0.5,
+          opacity: 1,
+          rotation: 0,
+        },
+        {
+          x: gsap.utils.random(-100, 100),
+          y: gsap.utils.random(-100, 100),
+          scale: gsap.utils.random(0.3, 1),
+          opacity: 0,
+          rotation: gsap.utils.random(-90, 90),
+          duration: gsap.utils.random(1, 2),
+          ease: "power2.out",
+          onComplete: () => {
+            container.removeChild(heart)
+            if (container.childNodes.length === 0) {
+              document.body.removeChild(container)
+            }
+          },
+        },
+      )
+    }
+  }
 
   return (
     <motion.header
@@ -31,7 +204,7 @@ export function Navbar({ onOpenMenu }: NavbarProps) {
     >
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center">
-          <motion.a
+          <MotionLink
             href="/"
             className="text-[#8b0000] hover:text-[#a50000] transition-colors flex items-center space-x-2"
             whileHover={{ scale: 1.05 }}
@@ -43,21 +216,94 @@ export function Navbar({ onOpenMenu }: NavbarProps) {
               </svg>
             </motion.div>
             <span className="font-semibold text-xl">Vemos Vamos</span>
-          </motion.a>
+          </MotionLink>
 
-          <motion.button
-            className="relative overflow-hidden group px-5 py-2.5 rounded-full bg-gradient-to-br from-[#8b0000] to-[#a50000] text-white shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={onOpenMenu}
+          {/* Heart-themed Language Toggle */}
+          <motion.div
+            ref={toggleRef}
+            className="relative flex items-center justify-center cursor-pointer"
+            onClick={toggleLanguage}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <span className="relative z-10 font-medium">Menu</span>
-            <motion.span
-              className="absolute inset-0 bg-gradient-to-tr from-[#a50000] to-[#8b0000] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              initial={{ x: "100%" }}
-              whileHover={{ x: 0 }}
-              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+            {/* Heart SVG */}
+            <div className="relative w-16 h-16 flex items-center justify-center">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-12 h-12 drop-shadow-md transition-all duration-300"
+                style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}
+              >
+                <path
+                  ref={heartRef}
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  fill="#2a9d8f"
+                />
+              </svg>
+
+              {/* Language text overlays */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center overflow-visible">
+                <span
+                  ref={enTextRef}
+                  className="text-xs font-bold text-white absolute"
+                  style={{ opacity: 1, transform: "translateY(0)" }}
+                >
+                  EN
+                </span>
+                <span
+                  ref={esTextRef}
+                  className="text-xs font-bold text-white absolute"
+                  style={{ opacity: 0, transform: "translateY(30px)" }}
+                >
+                  ES
+                </span>
+              </div>
+            </div>
+
+            {/* Decorative elements - positioned further from heart */}
+            <motion.div
+              className="absolute -top-1 -right-1 w-3 h-3 bg-[#ffc857] rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.7, 1, 0.7],
+              }}
+              transition={{
+                repeat: Number.POSITIVE_INFINITY,
+                duration: 2,
+                ease: "easeInOut",
+              }}
             />
+
+            <motion.div
+              className="absolute -bottom-1 -left-1 w-2 h-2 bg-[#2a9d8f] rounded-full"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.6, 1, 0.6],
+              }}
+              transition={{
+                repeat: Number.POSITIVE_INFINITY,
+                duration: 2.5,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            />
+          </motion.div>
+
+          {/* Hidden menu button for mobile menu access */}
+          <motion.button
+            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-[#8b0000] to-[#a50000] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-40 hidden"
+            onClick={onOpenMenu}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1, duration: 0.5, type: "spring", stiffness: 200 }}
+          >
+            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </motion.button>
         </div>
       </nav>
