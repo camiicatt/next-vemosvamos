@@ -41,6 +41,48 @@ export default function Home() {
     },
   }
 
+  const addCharacterHoverEffects = useCallback(
+    (chars: HTMLElement[]) => {
+      chars.forEach((char) => {
+        gsap.set(char, { transformOrigin: "center bottom" })
+
+        // Remove any existing event listeners to prevent duplicates
+        char.removeEventListener("mouseenter", char.dataset.mouseenterHandler as any)
+        char.removeEventListener("mouseleave", char.dataset.mouseleaveHandler as any)
+
+        const mouseenterHandler = () => {
+          gsap.to(char, {
+            y: -15,
+            color: currentLanguage === "en" ? "#a50000" : "#8b0000",
+            scale: 1.2,
+            rotation: gsap.utils.random(-10, 10),
+            duration: 0.3,
+            ease: "back.out(2)",
+          })
+        }
+
+        const mouseleaveHandler = () => {
+          gsap.to(char, {
+            y: 0,
+            color: "#8b0000",
+            scale: 1,
+            rotation: 0,
+            duration: 0.3,
+            ease: "power2.out",
+          })
+        }
+
+        // Store handlers for cleanup
+        char.dataset.mouseenterHandler = mouseenterHandler as any
+        char.dataset.mouseleaveHandler = mouseleaveHandler as any
+
+        char.addEventListener("mouseenter", mouseenterHandler)
+        char.addEventListener("mouseleave", mouseleaveHandler)
+      })
+    },
+    [currentLanguage],
+  )
+
   const animateTextEntrance = useCallback(() => {
     const headline = headlineRef.current
     const subheadline = subheadlineRef.current
@@ -120,40 +162,12 @@ export default function Home() {
       // Add hover effects for each character in the headline
       addCharacterHoverEffects(headlineSplit.chars as HTMLElement[])
     })
-  }, [])
+  }, [addCharacterHoverEffects])
 
   // Initial GSAP setup
   useEffect(() => {
     animateTextEntrance()
   }, [animateTextEntrance])
-
-  const addCharacterHoverEffects = (chars: HTMLElement[]) => {
-    chars.forEach((char) => {
-      gsap.set(char, { transformOrigin: "center bottom" })
-
-      char.addEventListener("mouseenter", () => {
-        gsap.to(char, {
-          y: -15,
-          color: currentLanguage === "en" ? "#a50000" : "#8b0000",
-          scale: 1.2,
-          rotation: gsap.utils.random(-10, 10),
-          duration: 0.3,
-          ease: "back.out(2)",
-        })
-      })
-
-      char.addEventListener("mouseleave", () => {
-        gsap.to(char, {
-          y: 0,
-          color: "#8b0000",
-          scale: 1,
-          rotation: 0,
-          duration: 0.3,
-          ease: "power2.out",
-        })
-      })
-    })
-  }
 
   // Language change handler
   const handleLanguageChange = (newLang: "en" | "es") => {
@@ -281,6 +295,10 @@ export default function Home() {
             from: "random",
           },
           ease: "back.out(1.7)",
+          onComplete: () => {
+            // Add hover effects to new characters after animation completes
+            addCharacterHoverEffects(newHeadlineSplit.chars as HTMLElement[])
+          },
         })
 
         // Subheadline: Wave effect
@@ -319,9 +337,6 @@ export default function Home() {
           duration: 0.5,
           ease: "elastic.out(1, 0.5)",
         })
-
-        // Add hover effects to new characters
-        addCharacterHoverEffects(newHeadlineSplit.chars as HTMLElement[])
       })
     })
   }
@@ -421,7 +436,7 @@ export default function Home() {
 
         <main className="relative z-10 flex-grow flex flex-col justify-center items-center">
           {/* Hero Section with GSAP Text Animations */}
-          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center px-4 md:mt-16">
+          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center px-4">
             <div className="max-w-5xl mx-auto text-center">
               <div className="">
                 <h1
