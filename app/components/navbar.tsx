@@ -12,7 +12,7 @@ interface NavbarProps {
   onLanguageChange?: (language: "en" | "es") => void
 }
 
-export function Navbar({ onOpenMenu, onLanguageChange }: NavbarProps) {
+export function Navbar({ onLanguageChange }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en")
   const toggleRef = useRef<HTMLDivElement>(null)
