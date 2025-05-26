@@ -17,13 +17,35 @@ declare global {
 
 const isDevelopment = process.env.NODE_ENV === "development"
 
-export function Newsletter() {
+interface NewsletterProps {
+  currentLanguage: "en" | "es"
+}
+
+export function Newsletter({ currentLanguage }: NewsletterProps) {
   const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const turnstileRef = useRef<HTMLDivElement>(null)
   const [turnstileWidget, setTurnstileWidget] = useState<string | null>(null)
+
+  // Language content
+  const content = {
+    en: {
+      emailPlaceholder: "Enter your email",
+      subscribe: "Subscribe",
+      subscribing: "Subscribing...",
+      successMessage: "Thanks for subscribing! Check your email to confirm.",
+      errorPrefix: "An error occurred:",
+    },
+    es: {
+      emailPlaceholder: "Ingresa tu correo electrónico",
+      subscribe: "Suscribirse",
+      subscribing: "Suscribiendo...",
+      successMessage: "¡Gracias por suscribirte! Revisa tu correo para confirmar.",
+      errorPrefix: "Ocurrió un error:",
+    },
+  }
 
   useEffect(() => {
     if (!isDevelopment && !window.turnstile) {
@@ -95,7 +117,9 @@ export function Newsletter() {
       }
     } catch (error) {
       console.error("Error subscribing to newsletter:", error)
-      setError(`An error occurred: ${error instanceof Error ? error.message : String(error)}. Please try again.`)
+      setError(
+        `${content[currentLanguage].errorPrefix} ${error instanceof Error ? error.message : String(error)}. Please try again.`,
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -125,17 +149,17 @@ export function Newsletter() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={content[currentLanguage].emailPlaceholder}
                 className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 text-white placeholder-white/50 text-lg"
               />
             </div>
-            {!isDevelopment && <div ref={turnstileRef} data-size="flexible" className="w-full" />}
+            {!isDevelopment && <div ref={turnstileRef} data-size="normal" className="w-full" />}
             <button
               type="submit"
               disabled={isSubmitting}
               className="w-full px-6 py-3 bg-white text-[#EE2D24] rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#EE2D24] text-lg font-semibold"
             >
-              {isSubmitting ? "Subscribing..." : "Subscribe"}
+              {isSubmitting ? content[currentLanguage].subscribing : content[currentLanguage].subscribe}
             </button>
             {error && <p className="text-white/80 text-sm">{error}</p>}
           </motion.form>
@@ -146,11 +170,10 @@ export function Newsletter() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white/10 text-white px-4 py-3 rounded-lg border border-white/20"
           >
-            Thanks for subscribing! Check your email to confirm.
+            {content[currentLanguage].successMessage}
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
 }
-

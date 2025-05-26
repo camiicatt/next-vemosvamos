@@ -1,22 +1,52 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import Link from "next/link"
 import "remixicon/fonts/remixicon.css"
 import { Newsletter } from "./newsletter"
 
 interface MobileMenuProps {
   onClose: () => void
+  currentLanguage: "en" | "es"
 }
 
-export function MobileMenu({ onClose }: MobileMenuProps) {
+export function MobileMenu({ onClose, currentLanguage }: MobileMenuProps) {
   const [showNewsletter, setShowNewsletter] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-  const [, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isVideoError, setIsVideoError] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Language content
+  const content = {
+    en: {
+      letsConnect: "Let's Connect",
+      contactUs: "CONTACT US",
+      followUs: "FOLLOW US",
+      back: "BACK",
+      getInTouch: "GET IN TOUCH",
+      contactDescription: "We'd love to hear from you. Fill out the form below and we'll get back to you soon.",
+      videoError: "Video error",
+      retry: "Retry",
+      playVideo: "Play video",
+      pauseVideo: "Pause video",
+    },
+    es: {
+      letsConnect: "Conectemos",
+      contactUs: "CONTÁCTANOS",
+      followUs: "SÍGUENOS",
+      back: "ATRÁS",
+      getInTouch: "PONTE EN CONTACTO",
+      contactDescription:
+        "Nos encantaría saber de ti. Completa el formulario a continuación y te responderemos pronto.",
+      videoError: "Error de video",
+      retry: "Reintentar",
+      playVideo: "Reproducir video",
+      pauseVideo: "Pausar video",
+    },
+  }
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -67,6 +97,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           .catch((error) => {
             console.error("Auto-play was prevented:", error)
             setIsPlaying(false)
+            // We'll show a play button that the user can click
           })
       }
     }
@@ -88,6 +119,22 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       video.removeEventListener("error", handleError)
     }
   }, [])
+
+  // Manual play function for user interaction
+  const togglePlayPause = () => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (video.paused) {
+      video
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.error("Play failed:", err))
+    } else {
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
 
   const socialLinks = [
     {
@@ -201,7 +248,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                       />
                     </svg>
-                    <h3 className="text-white text-lg font-bold mb-1">Video error</h3>
+                    <h3 className="text-white text-lg font-bold mb-1">{content[currentLanguage].videoError}</h3>
                     <button
                       onClick={() => {
                         setIsVideoError(false)
@@ -211,7 +258,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                       }}
                       className="mt-2 px-4 py-1 bg-white text-[#8b0000] rounded-full hover:bg-white/90 transition-colors text-sm"
                     >
-                      Retry
+                      {content[currentLanguage].retry}
                     </button>
                   </div>
                 )}
@@ -236,6 +283,45 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                     <source src="https://ampd-asset.s3.us-east-2.amazonaws.com/VV+Web+Banner+2.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
+
+                  {/* Overlay gradient for better text visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+
+                  {/* Play button overlay (shown when video is not playing) */}
+                  {!isPlaying && isVideoLoaded && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={togglePlayPause}
+                    >
+                      <motion.div
+                        className="w-16 h-16 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-full"
+                        whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </motion.div>
+                    </motion.div>
+                  )}
+
+                  {/* Video controls */}
+                  <div className="absolute bottom-2 right-2 flex space-x-2">
+                    <motion.button
+                      onClick={togglePlayPause}
+                      className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                      aria-label={isPlaying ? content[currentLanguage].pauseVideo : content[currentLanguage].playVideo}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        {!isPlaying ? <path d="M8 5v14l11-7z" /> : <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />}
+                      </svg>
+                    </motion.button>
+                  </div>
                 </motion.div>
               </div>
 
@@ -283,7 +369,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
-                  Let&apos;s Connect
+                  {content[currentLanguage].letsConnect}
                 </motion.h2>
 
                 <motion.button
@@ -292,8 +378,8 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="relative z-10 group-hover:text-[#a50000] transition-colors duration-300">
-                    CONTACT US
+                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                    {content[currentLanguage].contactUs}
                   </span>
                   <motion.span
                     className="absolute inset-0 bg-gradient-to-r from-[#8b0000] to-[#a50000] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -317,7 +403,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
                 >
-                  FOLLOW US
+                  {content[currentLanguage].followUs}
                 </motion.h2>
 
                 <div className="flex justify-center space-x-6">
@@ -398,7 +484,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                 className="text-white/80 hover:text-white transition-colors flex items-center space-x-2 text-lg"
               >
                 <i className="ri-arrow-left-line text-xl md:text-2xl" />
-                <span>BACK</span>
+                <span>{content[currentLanguage].back}</span>
               </button>
               <motion.button
                 onClick={() => setShowNewsletter(false)}
@@ -413,12 +499,14 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             <div className="flex-grow flex items-center justify-center p-4 md:p-8">
               <div className="w-full max-w-md">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">GET IN TOUCH</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                    {content[currentLanguage].getInTouch}
+                  </h2>
                   <p className="text-white/80 mb-6 text-base md:text-lg">
-                    We&apos;d love to hear from you. Fill out the form below and we&apos;ll get back to you soon.
+                    {content[currentLanguage].contactDescription}
                   </p>
                 </motion.div>
-                <Newsletter />
+                <Newsletter currentLanguage={currentLanguage} />
               </div>
             </div>
 

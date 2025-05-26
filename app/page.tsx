@@ -487,9 +487,11 @@ export default function Home() {
           </div>
         </main>
 
-        <Footer />
+        <Footer currentLanguage={currentLanguage} />
 
-        <AnimatePresence>{isMenuOpen && <MobileMenu onClose={() => setIsMenuOpen(false)} />}</AnimatePresence>
+        <AnimatePresence>
+          {isMenuOpen && <MobileMenu onClose={() => setIsMenuOpen(false)} currentLanguage={currentLanguage} />}
+        </AnimatePresence>
       </div>
     </>
   )
