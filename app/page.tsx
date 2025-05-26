@@ -15,6 +15,14 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(TextPlugin, SplitText)
 }
 
+// Extend HTMLElement to include our custom dataset properties
+interface ExtendedHTMLElement extends HTMLElement {
+  dataset: DOMStringMap & {
+    mouseenterHandler?: string
+    mouseleaveHandler?: string
+  }
+}
+
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "es">("en")
@@ -44,11 +52,21 @@ export default function Home() {
   const addCharacterHoverEffects = useCallback(
     (chars: HTMLElement[]) => {
       chars.forEach((char) => {
+        const extendedChar = char as ExtendedHTMLElement
         gsap.set(char, { transformOrigin: "center bottom" })
 
         // Remove any existing event listeners to prevent duplicates
-        char.removeEventListener("mouseenter", char.dataset.mouseenterHandler as any)
-        char.removeEventListener("mouseleave", char.dataset.mouseleaveHandler as any)
+        const existingMouseenterHandler = (extendedChar as ExtendedHTMLElement & { _mouseenterHandler?: () => void })
+          ._mouseenterHandler
+        const existingMouseleaveHandler = (extendedChar as ExtendedHTMLElement & { _mouseleaveHandler?: () => void })
+          ._mouseleaveHandler
+
+        if (existingMouseenterHandler) {
+          char.removeEventListener("mouseenter", existingMouseenterHandler)
+        }
+        if (existingMouseleaveHandler) {
+          char.removeEventListener("mouseleave", existingMouseleaveHandler)
+        }
 
         const mouseenterHandler = () => {
           gsap.to(char, {
@@ -73,8 +91,10 @@ export default function Home() {
         }
 
         // Store handlers for cleanup
-        char.dataset.mouseenterHandler = mouseenterHandler as any
-        char.dataset.mouseleaveHandler = mouseleaveHandler as any
+        ;(extendedChar as ExtendedHTMLElement & { _mouseenterHandler?: () => void })._mouseenterHandler =
+          mouseenterHandler
+        ;(extendedChar as ExtendedHTMLElement & { _mouseleaveHandler?: () => void })._mouseleaveHandler =
+          mouseleaveHandler
 
         char.addEventListener("mouseenter", mouseenterHandler)
         char.addEventListener("mouseleave", mouseleaveHandler)
