@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Navbar } from "./components/navbar"
 import { Footer } from "./components/footer"
@@ -22,8 +22,10 @@ export default function Home() {
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subheadlineRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLButtonElement>(null)
-  const [, setIsLoaded] = useState(false)
-  const [splitInstances, setSplitInstances] = useState<{ headline?: any; subheadline?: any }>({})
+  const [splitInstances, setSplitInstances] = useState<{
+    headline?: SplitText
+    subheadline?: SplitText
+  }>({})
 
   // Language content
   const content = {
@@ -39,13 +41,7 @@ export default function Home() {
     },
   }
 
-  // Initial GSAP setup
-  useEffect(() => {
-    setIsLoaded(true)
-    animateTextEntrance()
-  }, [])
-
-  const animateTextEntrance = () => {
+  const animateTextEntrance = useCallback(() => {
     const headline = headlineRef.current
     const subheadline = subheadlineRef.current
     const cta = ctaRef.current
@@ -124,7 +120,12 @@ export default function Home() {
       // Add hover effects for each character in the headline
       addCharacterHoverEffects(headlineSplit.chars as HTMLElement[])
     })
-  }
+  }, [])
+
+  // Initial GSAP setup
+  useEffect(() => {
+    animateTextEntrance()
+  }, [animateTextEntrance])
 
   const addCharacterHoverEffects = (chars: HTMLElement[]) => {
     chars.forEach((char) => {
@@ -211,23 +212,17 @@ export default function Home() {
         },
         "-=0.2",
       )
-      exitTl.to(
-        cta,
-        {
-          scale: 0.8,
-          duration: 0.15,
-          ease: "back.in(1.7)",
-        }
-      )
-      exitTl.to(
-        cta,
-        {
-          scale: 0,
-          opacity: 0,
-          duration: 0.2,
-          ease: "back.in(1.7)",
-        }
-      )
+      exitTl.to(cta, {
+        scale: 0.8,
+        duration: 0.15,
+        ease: "back.in(1.7)",
+      })
+      exitTl.to(cta, {
+        scale: 0,
+        opacity: 0,
+        duration: 0.2,
+        ease: "back.in(1.7)",
+      })
 
       // Phase 2: Update content and prepare for entrance
       exitTl.call(() => {
@@ -314,22 +309,16 @@ export default function Home() {
           },
           "-=0.2",
         )
-        entranceTl.to(
-          cta,
-          {
-            scale: 1.2,
-            duration: 0.3,
-            ease: "power1.out",
-          }
-        )
-        entranceTl.to(
-          cta,
-          {
-            scale: 1,
-            duration: 0.5,
-            ease: "elastic.out(1, 0.5)",
-          }
-        )
+        entranceTl.to(cta, {
+          scale: 1.2,
+          duration: 0.3,
+          ease: "power1.out",
+        })
+        entranceTl.to(cta, {
+          scale: 1,
+          duration: 0.5,
+          ease: "elastic.out(1, 0.5)",
+        })
 
         // Add hover effects to new characters
         addCharacterHoverEffects(newHeadlineSplit.chars as HTMLElement[])
@@ -432,7 +421,7 @@ export default function Home() {
 
         <main className="relative z-10 flex-grow flex flex-col justify-center items-center">
           {/* Hero Section with GSAP Text Animations */}
-          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center px-4">
+          <div ref={containerRef} className="w-full min-h-screen flex flex-col justify-center items-center px-4 md:mt-16">
             <div className="max-w-5xl mx-auto text-center">
               <div className="">
                 <h1
