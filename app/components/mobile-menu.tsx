@@ -378,7 +378,7 @@ export function MobileMenu({ onClose, currentLanguage }: MobileMenuProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                  <span className="relative z-10 group-hover:text-[#8b0000] transition-colors duration-300">
                     {content[currentLanguage].contactUs}
                   </span>
                   <motion.span
