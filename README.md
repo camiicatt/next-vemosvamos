@@ -1,5 +1,7 @@
 # Vemos Vamos
 
+Cami was here
+
 Vemos Vamos is a bilingual, creatively-driven web platform designed to foster entrepreneurial success through community, resources, and innovative solutions. The site features a fluid, animated interface built with Next.js and GSAP, offering content in both English and Spanish.
 
 ## Tech Stack
